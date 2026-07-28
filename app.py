@@ -1,5 +1,5 @@
 from flask import Flask, render_template, request, redirect, url_for, session
-import sqlite3
+import psycopg2
 from datetime import datetime
 
 app = Flask(__name__)
@@ -7,30 +7,32 @@ app.secret_key = "chave_secreta_para_sessoes"
 
 DATABASE_URL = "postgresql://postgres:escolasistema2027@db.jztctnjhnntqdlhaxxhf.supabase.co:5432/postgres"
 
-# Inicialização e atualização do Banco de Dados
+# Função para conectar ao Supabase
+def get_db_connection():
+    conn = psycopg2.connect(DATABASE_URL)
+    return conn
+
+# Inicialização da tabela no Supabase
 def init_db():
-    conn = sqlite3.connect('escola.db')
-    cursor = conn.cursor()
-    cursor.execute('''
-        CREATE TABLE IF NOT EXISTS advertencias (
-            id INTEGER PRIMARY KEY AUTOINCREMENT,
-            aluno TEXT NOT NULL,
-            turma TEXT NOT NULL,
-            professor TEXT NOT NULL,
-            motivo TEXT NOT NULL,
-            gravidade TEXT DEFAULT 'Média',
-            data TEXT
-        )
-    ''')
-    
-    # Garante que a coluna gravidade exista
     try:
-        cursor.execute("ALTER TABLE advertencias ADD COLUMN gravidade TEXT DEFAULT 'Média'")
-    except sqlite3.OperationalError:
-        pass
-        
-    conn.commit()
-    conn.close()
+        conn = get_db_connection()
+        cursor = conn.cursor()
+        cursor.execute('''
+            CREATE TABLE IF NOT EXISTS advertencias (
+                id SERIAL PRIMARY KEY,
+                aluno TEXT NOT NULL,
+                turma TEXT NOT NULL,
+                professor TEXT NOT NULL,
+                motivo TEXT NOT NULL,
+                gravidade TEXT DEFAULT 'Média',
+                data TEXT
+            )
+        ''')
+        conn.commit()
+        cursor.close()
+        conn.close()
+    except Exception as e:
+        print(f"Erro ao inicializar o banco: {e}")
 
 init_db()
 
@@ -63,7 +65,7 @@ def login():
 
     return render_template('login.html', erro_usuario=erro_usuario, erro_senha=erro_senha)
 
-# Painel do Professor (Salva Data/Hora do Brasil)
+# Painel do Professor
 @app.route('/professor', methods=['GET', 'POST'])
 def painel_professor():
     if session.get('user') != 'professor':
@@ -76,16 +78,16 @@ def painel_professor():
         motivo = request.form['motivo']
         gravidade = request.form.get('gravidade', 'Média')
 
-        # Pega a Data e Hora atual exata do seu computador no formato Brasileiro (DD/MM/AAAA HH:MM)
         data_atual = datetime.now().strftime('%d/%m/%Y %H:%M:%S')
 
-        conn = sqlite3.connect('escola.db')
+        conn = get_db_connection()
         cursor = conn.cursor()
         cursor.execute(
-            'INSERT INTO advertencias (aluno, turma, professor, motivo, gravidade, data) VALUES (?, ?, ?, ?, ?, ?)',
+            'INSERT INTO advertencias (aluno, turma, professor, motivo, gravidade, data) VALUES (%s, %s, %s, %s, %s, %s)',
             (aluno, turma, professor, motivo, gravidade, data_atual)
         )
         conn.commit()
+        cursor.close()
         conn.close()
         
         return render_template('professor.html', sucesso=True)
@@ -100,14 +102,14 @@ def painel_secretaria():
 
     termo_busca = request.args.get('busca', '').strip()
 
-    conn = sqlite3.connect('escola.db')
+    conn = get_db_connection()
     cursor = conn.cursor()
 
     if termo_busca:
         cursor.execute('''
             SELECT id, aluno, turma, professor, motivo, data, gravidade 
             FROM advertencias 
-            WHERE aluno LIKE ? OR turma LIKE ? 
+            WHERE aluno ILIKE %s OR turma ILIKE %s 
             ORDER BY id DESC
         ''', (f'%{termo_busca}%', f'%{termo_busca}%'))
     else:
@@ -116,11 +118,12 @@ def painel_secretaria():
     registros = cursor.fetchall()
 
     # Estatísticas
-    cursor.execute('SELECT COUNT(*), SUM(CASE WHEN gravidade="Grave" THEN 1 ELSE 0 END) FROM advertencias')
+    cursor.execute("SELECT COUNT(*), SUM(CASE WHEN gravidade = 'Grave' THEN 1 ELSE 0 END) FROM advertencias")
     total_stats = cursor.fetchone()
-    total_ocorrencias = total_stats[0] or 0
-    total_graves = total_stats[1] or 0
+    total_ocorrencias = total_stats[0] if total_stats[0] else 0
+    total_graves = total_stats[1] if total_stats[1] else 0
 
+    cursor.close()
     conn.close()
 
     return render_template('secretaria.html', 
@@ -135,10 +138,11 @@ def excluir_advertencia(id):
     if session.get('user') != 'secretaria':
         return redirect(url_for('login'))
 
-    conn = sqlite3.connect('escola.db')
+    conn = get_db_connection()
     cursor = conn.cursor()
-    cursor.execute('DELETE FROM advertencias WHERE id = ?', (id,))
+    cursor.execute('DELETE FROM advertencias WHERE id = %s', (id,))
     conn.commit()
+    cursor.close()
     conn.close()
 
     return redirect(url_for('painel_secretaria'))
@@ -149,10 +153,11 @@ def imprimir_advertencia(id):
     if session.get('user') != 'secretaria':
         return redirect(url_for('login'))
 
-    conn = sqlite3.connect('escola.db')
+    conn = get_db_connection()
     cursor = conn.cursor()
-    cursor.execute('SELECT id, aluno, turma, professor, motivo, data, gravidade FROM advertencias WHERE id = ?', (id,))
+    cursor.execute('SELECT id, aluno, turma, professor, motivo, data, gravidade FROM advertencias WHERE id = %s', (id,))
     item = cursor.fetchone()
+    cursor.close()
     conn.close()
 
     if not item:
