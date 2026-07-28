@@ -6,7 +6,7 @@ app = Flask(__name__)
 app.secret_key = "chave_secreta_para_sessoes"
 
 # Adicionado ?sslmode=require no final para garantir a conexão segura com o Supabase
-DATABASE_URL = "postgresql://postgres:escolasistema2027@db.jztctnjhnntqdlhaxxhf.supabase.co:5432/postgres?sslmode=require"
+DATABASE_URL = "postgresql://postgres.jztctnjhnntqdlhaxxhf:escolasistema2027@aws-0-sa-east-1.pooler.supabase.com:6543/postgres?sslmode=require"
 
 # Conexão com o banco de dados Supabase
 def get_db_connection():
