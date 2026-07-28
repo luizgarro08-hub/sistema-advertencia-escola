@@ -5,14 +5,14 @@ from datetime import datetime
 app = Flask(__name__)
 app.secret_key = "chave_secreta_para_sessoes"
 
-# Adicionado ?sslmode=require no final para garantir a conexão segura com o Supabase
+# URL usando a porta do Pooler e ativando sslmode=require para evitar falhas de conexão
 DATABASE_URL = "postgresql://postgres.jztctnjhnntqdlhaxxhf:escolasistema2027@aws-0-sa-east-1.pooler.supabase.com:6543/postgres?sslmode=require"
 
-# Conexão com o banco de dados Supabase
+# Função para abrir e retornar a conexão com o Supabase
 def get_db_connection():
     return psycopg2.connect(DATABASE_URL)
 
-# Inicialização e criação automática da tabela no Supabase
+# Garante que a tabela exista dentro do Supabase
 def init_db():
     conn = None
     try:
@@ -37,7 +37,7 @@ def init_db():
         if conn is not None:
             conn.close()
 
-# Executa ao iniciar a aplicação
+# Executa ao iniciar o app
 init_db()
 
 # Login
