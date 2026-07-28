@@ -43,7 +43,7 @@ def login():
         senha = request.form.get('senha', '').strip()
         
         usuarios_validos = {
-            'professor': '1234',
+            'professor': '1223',
             'secretaria': 'admin123'
         }
 
