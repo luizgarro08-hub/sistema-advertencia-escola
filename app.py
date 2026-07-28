@@ -6,7 +6,7 @@ app = Flask(__name__)
 app.secret_key = "chave_secreta_para_sessoes"
 
 # URL usando a porta do Pooler e ativando sslmode=require para evitar falhas de conexão
-DATABASE_URL = "postgresql://postgres.jztctnjhnntqdlhaxxhf:escolasistema2027@aws-0-sa-east-1.pooler.supabase.com:6543/postgres?sslmode=require"
+DATABASE_URL = "postgresql://postgres.jztctnjhnntqdlhaxxhf:escolasistema2027@aws-0-ca-central-1.pooler.supabase.com:6543/postgres?sslmode=require"
 
 # Função para abrir e retornar a conexão com o Supabase
 def get_db_connection():
