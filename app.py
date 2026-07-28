@@ -5,7 +5,7 @@ from datetime import datetime
 app = Flask(__name__)
 app.secret_key = "chave_secreta_para_sessoes"
 
-DATABASE_URL = "postgresql://postgres:SUA_SENHA_AQUI@db.jztctnjhnntqdlhaxxhf.supabase.co:5432/postgres"
+DATABASE_URL = "postgresql://postgres:Eulindo@2022@db.jztctnjhnntqdlhaxxhf.supabase.co:5432/postgres"
 
 # Inicialização e atualização do Banco de Dados
 def init_db():
