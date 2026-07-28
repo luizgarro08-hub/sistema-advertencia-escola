@@ -5,15 +5,16 @@ from datetime import datetime
 app = Flask(__name__)
 app.secret_key = "chave_secreta_para_sessoes"
 
-DATABASE_URL = "postgresql://postgres:escolasistema2027@db.jztctnjhnntqdlhaxxhf.supabase.co:5432/postgres"
+# Adicionado ?sslmode=require no final para garantir a conexão segura com o Supabase
+DATABASE_URL = "postgresql://postgres:escolasistema2027@db.jztctnjhnntqdlhaxxhf.supabase.co:5432/postgres?sslmode=require"
 
-# Função para conectar ao Supabase
+# Conexão com o banco de dados Supabase
 def get_db_connection():
-    conn = psycopg2.connect(DATABASE_URL)
-    return conn
+    return psycopg2.connect(DATABASE_URL)
 
-# Inicialização da tabela no Supabase
+# Inicialização e criação automática da tabela no Supabase
 def init_db():
+    conn = None
     try:
         conn = get_db_connection()
         cursor = conn.cursor()
@@ -30,10 +31,13 @@ def init_db():
         ''')
         conn.commit()
         cursor.close()
-        conn.close()
     except Exception as e:
         print(f"Erro ao inicializar o banco: {e}")
+    finally:
+        if conn is not None:
+            conn.close()
 
+# Executa ao iniciar a aplicação
 init_db()
 
 # Login
