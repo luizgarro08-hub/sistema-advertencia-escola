@@ -35,29 +35,16 @@
         }
 
         .logo-escola {
-            width: 100px;
-            height: 100px;
+            width: 120px;
+            height: 120px;
             object-fit: contain;
             border-radius: 50%;
-        }
-
-        /* Logótipo em SVG/CSS caso a imagem PNG falhe */
-        .logo-placeholder {
-            width: 100px;
-            height: 100px;
-            border-radius: 50%;
-            background: radial-gradient(circle, #00bfff 0%, #007bff 100%);
-            border: 3px solid #ffffff;
-            display: inline-flex;
-            align-items: center;
-            justify-content: center;
-            box-shadow: 0 4px 10px rgba(0,0,0,0.15);
         }
     </style>
 </head>
 <body class="d-flex align-items-center justify-content-center p-3">
 
-    <button id="btnDarkMode" class="btn btn-sm btn-light bg-opacity-25 text-white border-0 rounded-circle p-2 btn-theme-toggle shadow-sm">
+    <button id="btnDarkMode" class="btn btn-sm btn-light bg-opacity-25 text-white border-0 rounded-circle p-2 btn-theme-toggle shadow-sm" title="Alternar tema">
         <i class="bi bi-moon-stars-fill fs-5" id="darkModeIcon"></i>
     </button>
 
@@ -68,16 +55,30 @@
                 <img src="{{ url_for('static', filename='logo.jpg') }}" 
                      alt="E. E. Mestra Hercília" 
                      class="logo-escola shadow-sm"
-                     onerror="this.style.display='none'; document.getElementById('fallback-logo').style.display='inline-flex';">
+                     onerror="this.style.display='none'; document.getElementById('svg-logo-completa').style.display='block';">
                 
-                <div id="fallback-logo" class="logo-placeholder" style="display: none;">
-                    <svg width="60" height="60" viewBox="0 0 100 100" fill="none" xmlns="http://www.w3.org/2000/svg">
-                        <circle cx="50" cy="50" r="45" fill="#00A3E0" stroke="white" stroke-width="3"/>
-                        <circle cx="50" cy="35" r="14" fill="#FFC72C"/>
-                        <path d="M20 65 C35 50, 45 40, 50 25 C55 40, 65 50, 80 65 Z" fill="white"/>
-                        <path d="M25 72 C40 68, 60 68, 75 72" stroke="white" stroke-width="4" stroke-linecap="round"/>
-                    </svg>
-                </div>
+                <svg id="svg-logo-completa" width="125" height="125" viewBox="0 0 200 200" style="display: none;" class="shadow-sm rounded-circle">
+                    <defs>
+                        <path id="textCircle" d="M 25,100 A 75,75 0 1,1 175,100" />
+                    </defs>
+
+                    <circle cx="100" cy="100" r="96" fill="#00A3E0" stroke="#FFFFFF" stroke-width="4"/>
+
+                    <circle cx="100" cy="75" r="24" fill="#FFC72C"/>
+
+                    <circle cx="100" cy="110" r="50" fill="#0092D8" stroke="#FFFFFF" stroke-width="3"/>
+
+                    <path d="M 65 130 C 80 95, 95 78, 100 52 C 105 78, 120 95, 135 130 Z" fill="#FFFFFF"/>
+                    <path d="M 58 138 Q 100 128 142 138" stroke="#FFFFFF" stroke-width="6" stroke-linecap="round" fill="none"/>
+                    
+                    <path d="M 60 152 Q 80 145 100 152 T 140 152" stroke="#FFFFFF" stroke-width="3" fill="none"/>
+
+                    <text font-family="Arial, sans-serif" font-size="14" font-weight="bold" fill="#FFFFFF" letter-spacing="1.5">
+                        <textPath href="#textCircle" startOffset="50%" text-anchor="middle">
+                            E. E. MESTRA HERCÍLIA
+                        </textPath>
+                    </text>
+                </svg>
             </div>
 
             <h4 class="fw-bold mb-1">Advertência online</h4>
