@@ -35,8 +35,8 @@
         }
 
         .logo-escola {
-            width: 120px;
-            height: 120px;
+            width: 130px;
+            height: 130px;
             object-fit: contain;
             border-radius: 50%;
         }
@@ -52,29 +52,40 @@
         <div class="card-body text-center">
             
             <div class="mb-3 d-flex justify-content-center">
-                <img src="{{ url_for('static', filename='logo.jpg') }}" 
+                <img src="{{ url_for('static', filename='logo.png') }}" 
                      alt="E. E. Mestra Hercília" 
                      class="logo-escola shadow-sm"
                      onerror="this.style.display='none'; document.getElementById('svg-logo-completa').style.display='block';">
                 
-                <svg id="svg-logo-completa" width="125" height="125" viewBox="0 0 200 200" style="display: none;" class="shadow-sm rounded-circle">
+                <svg id="svg-logo-completa" width="130" height="130" viewBox="0 0 300 300" style="display: none;" class="shadow-sm rounded-circle">
                     <defs>
-                        <path id="textCircle" d="M 25,100 A 75,75 0 1,1 175,100" />
+                        <path id="curveTop" d="M 35,150 A 115,115 0 1,1 265,150" />
+                        <path id="curveBottom" d="M 60,205 A 105,105 0 0,0 240,205" />
                     </defs>
 
-                    <circle cx="100" cy="100" r="96" fill="#00A3E0" stroke="#FFFFFF" stroke-width="4"/>
+                    <circle cx="150" cy="150" r="145" fill="#00BFFF" stroke="#FFFFFF" stroke-width="6"/>
 
-                    <circle cx="100" cy="75" r="24" fill="#FFC72C"/>
+                    <circle cx="150" cy="100" r="35" fill="#FFD700"/>
+                    <path d="M 115 105 L 150 45 L 185 105 Z" fill="#FF8C00"/>
 
-                    <circle cx="100" cy="110" r="50" fill="#0092D8" stroke="#FFFFFF" stroke-width="3"/>
+                    <path d="M 85 175 C 110 120, 140 100, 148 70 C 150 110, 175 130, 215 175 Z" fill="#FFFFFF"/>
+                    <path d="M 125 175 C 135 130, 150 115, 152 85 C 153 115, 170 135, 195 175 Z" fill="#FFFFFF"/>
 
-                    <path d="M 65 130 C 80 95, 95 78, 100 52 C 105 78, 120 95, 135 130 Z" fill="#FFFFFF"/>
-                    <path d="M 58 138 Q 100 128 142 138" stroke="#FFFFFF" stroke-width="6" stroke-linecap="round" fill="none"/>
-                    
-                    <path d="M 60 152 Q 80 145 100 152 T 140 152" stroke="#FFFFFF" stroke-width="3" fill="none"/>
+                    <path d="M 70 180 Q 150 165 230 180 L 210 200 Q 150 195 90 200 Z" fill="#1E56A0" stroke="#FFFFFF" stroke-width="2"/>
+                    <text x="150" y="191" font-family="Arial, sans-serif" font-size="11" font-weight="bold" fill="#FFFFFF" text-anchor="middle">TUDO PELO SABER</text>
 
-                    <text font-family="Arial, sans-serif" font-size="14" font-weight="bold" fill="#FFFFFF" letter-spacing="1.5">
-                        <textPath href="#textCircle" startOffset="50%" text-anchor="middle">
+                    <path d="M 60 215 Q 90 205 120 215 T 180 215 T 240 215" stroke="#FFFFFF" stroke-width="5" fill="none"/>
+                    <path d="M 65 228 Q 95 218 125 228 T 185 228 T 235 228" stroke="#FFFFFF" stroke-width="4" fill="none"/>
+
+                    <path d="M 60 250 Q 150 280 240 250 L 230 235 Q 150 260 70 235 Z" fill="#2070C4" stroke="#FFFFFF" stroke-width="2"/>
+                    <text font-family="Arial, sans-serif" font-size="14" font-weight="bold" fill="#FFFFFF">
+                        <textPath href="#curveBottom" startOffset="50%" text-anchor="middle">
+                            SÃO FRANCISCO - MG
+                        </textPath>
+                    </text>
+
+                    <text font-family="Arial, sans-serif" font-size="22" font-weight="900" fill="#FFFFFF" letter-spacing="2">
+                        <textPath href="#curveTop" startOffset="50%" text-anchor="middle">
                             E. E. MESTRA HERCÍLIA
                         </textPath>
                     </text>
