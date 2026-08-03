@@ -2,9 +2,9 @@
 <html lang="pt-br" data-bs-theme="light">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Painel do Professor</title>
-
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Termo de Advertência - E. E. Mestra Hercília</title>
+    
     <link rel="manifest" href="{{ url_for('static', filename='manifest.json') }}">
     <meta name="theme-color" content="#0d6efd">
     <script>
@@ -15,140 +15,187 @@
 
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css" rel="stylesheet">
-    
+
     <style>
         body {
-            transition: background-color 0.3s ease, color 0.3s ease;
+            background-color: #f4f6f9;
+            min-height: 100vh;
+            transition: background 0.3s ease;
         }
-        .btn-check:checked + .btn-outline-success { background-color: #198754; color: white; }
-        .btn-check:checked + .btn-outline-warning { background-color: #ffc107; color: black; }
-        .btn-check:checked + .btn-outline-danger { background-color: #dc3545; color: white; }
-        .motivo-chip { cursor: pointer; transition: all 0.2s; }
-        .motivo-chip:hover { opacity: 0.8; }
+
+        [data-bs-theme="dark"] body {
+            background-color: #121212;
+        }
+
+        .btn-theme-toggle {
+            position: fixed;
+            top: 15px;
+            right: 15px;
+            z-index: 1000;
+        }
+
+        .logo-header {
+            width: 75px;
+            height: 75px;
+            object-fit: contain;
+        }
+
+        .form-check-input:checked {
+            background-color: #0d6efd;
+            border-color: #0d6efd;
+        }
     </style>
 </head>
-<body class="bg-body-tertiary pb-5">
+<body class="py-4 px-2">
 
-    <nav class="navbar navbar-expand-lg navbar-dark bg-primary shadow-sm mb-4">
-        <div class="container d-flex justify-content-between align-items-center">
-            <span class="navbar-brand fw-bold d-flex align-items-center">
-                <i class="bi bi-person-badge-fill me-2 fs-4"></i> Área do Professor
-            </span>
+    <button id="btnDarkMode" class="btn btn-sm btn-light bg-opacity-25 text-body border-0 rounded-circle p-2 btn-theme-toggle shadow-sm" title="Alternar tema">
+        <i class="bi bi-moon-stars-fill fs-5" id="darkModeIcon"></i>
+    </button>
+
+    <div class="container" style="max-width: 680px;">
+        <div class="card shadow-lg border-0 rounded-5 p-3 p-md-4 bg-body-tertiary">
             
-            <div class="d-flex align-items-center gap-2">
-                <button id="btnDarkMode" class="btn btn-outline-light btn-sm rounded-pill px-3 me-2">
-                    <i class="bi bi-moon-stars-fill" id="darkModeIcon"></i>
-                </button>
-
-                <a href="/logout" class="btn btn-outline-light btn-sm rounded-pill px-3">
-                    <i class="bi bi-box-arrow-right me-1"></i> Sair
-                </a>
-            </div>
-        </div>
-    </nav>
-
-    <div class="container" style="max-width: 700px;">
-
-        {% if sucesso %}
-            <div class="alert alert-success alert-dismissible fade show rounded-4 border-0 shadow-sm p-3 mb-4 d-flex align-items-center" role="alert">
-                <i class="bi bi-check-circle-fill text-success fs-3 me-3"></i>
-                <div>
-                    <strong class="d-block">Advertência enviada!</strong>
-                    O registro já está disponível no painel da secretaria.
+            <div class="text-center mb-4">
+                <div class="d-flex justify-content-center align-items-center mb-2">
+                    <img src="{{ url_for('static', filename='logo.jpg') }}" 
+                         alt="Logo Escola" 
+                         class="logo-header me-2"
+                         onerror="this.src='{{ url_for('static', filename='logo.png') }}'; this.onerror=null;">
                 </div>
-                <button type="button" class="btn-close ms-auto" data-bs-dismiss="alert"></button>
-            </div>
-        {% endif %}
-
-        <div class="card border-0 shadow-lg rounded-4 p-4 bg-body">
-            
-            <div class="mb-4">
-                <h4 class="fw-bold mb-1">Registrar Ocorrência Disciplinar</h4>
-                <p class="text-secondary small">Preencha os campos abaixo para notificar a coordenação.</p>
-            </div>
-
-            <form method="POST">
+                <h5 class="fw-bold text-uppercase mb-0">Escola Estadual Mestra Hercília</h5>
+                <p class="text-secondary small mb-1">Secretaria de Estado de Educação de Minas Gerais — Ensino Fundamental e Médio</p>
+                <p class="text-muted extra-small mb-3" style="font-size: 0.75rem;">Decreto nº 7.440 – de 27/02/1964 * Portaria nº 24 – de 10/01/2012</p>
                 
-                <div class="mb-3">
-                    <label class="form-label small fw-bold text-secondary text-uppercase">Professor Responsável</label>
-                    <div class="input-group">
-                        <span class="input-group-text bg-body-secondary border-0"><i class="bi bi-person-fill text-secondary"></i></span>
-                        <input type="text" name="professor" class="form-control bg-body-secondary border-0 py-2" placeholder="Nome do professor" required>
-                    </div>
-                </div>
+                <span class="badge bg-primary fs-6 px-3 py-2 rounded-pill shadow-sm">TERMO DE ADVERTÊNCIA</span>
+            </div>
 
+            <form method="POST" action="/gerar_advertencia" class="text-start">
+                
                 <div class="row g-3 mb-3">
                     <div class="col-md-8">
-                        <label class="form-label small fw-bold text-secondary text-uppercase">Nome Completo do Aluno</label>
+                        <label class="form-label fw-bold text-secondary small">ESTUDANTE</label>
                         <div class="input-group">
-                            <span class="input-group-text bg-body-secondary border-0"><i class="bi bi-backpack-fill text-secondary"></i></span>
-                            <input type="text" name="aluno" class="form-control bg-body-secondary border-0 py-2" placeholder="Nome do aluno" required>
+                            <span class="input-group-text bg-body-secondary border-0"><i class="bi bi-person text-secondary"></i></span>
+                            <input type="text" name="estudante" class="form-control bg-body-secondary border-0 py-2" placeholder="Nome completo do estudante" required>
                         </div>
                     </div>
                     <div class="col-md-4">
-                        <label class="form-label small fw-bold text-secondary text-uppercase">Turma</label>
+                        <label class="form-label fw-bold text-secondary small">TURMA</label>
                         <div class="input-group">
-                            <span class="input-group-text bg-body-secondary border-0"><i class="bi bi-people-fill text-secondary"></i></span>
-                            <input type="text" name="turma" class="form-control bg-body-secondary border-0 py-2" placeholder="Ex: 9º Ano A" required>
+                            <span class="input-group-text bg-body-secondary border-0"><i class="bi bi-people text-secondary"></i></span>
+                            <input type="text" name="turma" class="form-control bg-body-secondary border-0 py-2" placeholder="Ex: 1º Ano A" required>
                         </div>
                     </div>
                 </div>
 
-                <div class="mb-4">
-                    <label class="form-label small fw-bold text-secondary text-uppercase d-block mb-2">Nível de Gravidade</label>
-                    <div class="btn-group w-100" role="group">
-                        
-                        <input type="radio" class="btn-check" name="gravidade" id="gravidade_leve" value="Leve" autocomplete="off">
-                        <label class="btn btn-outline-success py-2 fw-bold" for="gravidade_leve">
-                            <i class="bi bi-info-circle me-1"></i> Leve
-                        </label>
+                <hr class="my-4 text-muted">
 
-                        <input type="radio" class="btn-check" name="gravidade" id="gravidade_media" value="Média" autocomplete="off" checked>
-                        <label class="btn btn-outline-warning py-2 fw-bold" for="gravidade_media">
-                            <i class="bi bi-exclamation-circle me-1"></i> Média
-                        </label>
+                <label class="form-label fw-bold text-dark mb-2">Foi advertido(a) pela(s) falta(s) mencionada(s) abaixo:</label>
+                
+                <div class="card p-3 border-0 bg-body-secondary rounded-4 mb-4">
+                    
+                    <div class="form-check mb-2">
+                        <input class="form-check-input" type="checkbox" name="motivo" value="Uso indebido do celular." id="m1">
+                        <label class="form-check-label" for="m1">Uso indebido do celular.</label>
+                    </div>
 
-                        <input type="radio" class="btn-check" name="gravidade" id="gravidade_grave" value="Grave" autocomplete="off">
-                        <label class="btn btn-outline-danger py-2 fw-bold" for="gravidade_grave">
-                            <i class="bi bi-exclamation-triangle-fill me-1"></i> Grave
-                        </label>
+                    <div class="form-check mb-2">
+                        <input class="form-check-input" type="checkbox" name="motivo" value="Discussão e/ou agressão ao(s) colega(s) em sala de aula ou nas dependências da escola." id="m2">
+                        <label class="form-check-label" for="m2">Discussão e/ou agressão ao(s) colega(s) em sala de aula ou nas dependências da escola.</label>
+                    </div>
 
+                    <div class="form-check mb-2">
+                        <input class="form-check-input" type="checkbox" name="motivo" value="Danos causados ao patrimônio da escola e/ou materiais de colegas de turma." id="m3">
+                        <label class="form-check-label" for="m3">Danos causados ao patrimônio da escola e/ou materiais de colegas de turma.</label>
+                    </div>
+
+                    <div class="form-check mb-2">
+                        <input class="form-check-input" type="checkbox" name="motivo" value="Desrespeito aos professores/demais servidores da escola." id="m4">
+                        <label class="form-check-label" for="m4">Desrespeito aos professores/demais servidores da escola.</label>
+                    </div>
+
+                    <div class="form-check mb-2">
+                        <input class="form-check-input" type="checkbox" name="motivo" value="Ausência de pontualidade no horário de entrada na escola e/ou na sala de aula." id="m5">
+                        <label class="form-check-label" for="m5">Ausência de pontualidade no horário de entrada na escola e/ou na sala de aula.</label>
+                    </div>
+
+                    <div class="form-check mb-2">
+                        <input class="form-check-input" type="checkbox" name="motivo" value="Infrequência as aulas." id="m6">
+                        <label class="form-check-label" for="m6">Infrequência as aulas.</label>
+                    </div>
+
+                    <div class="form-check mb-2">
+                        <input class="form-check-input" type="checkbox" name="motivo" value="Não cumprimento das atividades diárias proposta pelo professor (a)." id="m7">
+                        <label class="form-check-label" for="m7">Não cumprimento das atividades diárias proposta pelo professor (a).</label>
+                    </div>
+
+                    <div class="form-check mb-2">
+                        <input class="form-check-input" type="checkbox" name="motivo" value="Não cumprimento das atividades em progressão parcial." id="m8">
+                        <label class="form-check-label" for="m8">Não cumprimento das atividades em progressão parcial.</label>
+                    </div>
+
+                    <div class="form-check mb-2">
+                        <input class="form-check-input" type="checkbox" name="motivo" value="Uso do celular e/ou outro aparelho eletroeletrônico na escola e/ou em sala de aula sem permissão. (Lei nº 15.100/2025)." id="m9">
+                        <label class="form-check-label" for="m9">
+                            Uso do celular e/ou outro aparelho eletroeletrônico na escola e/ou em sala de aula sem permissão. 
+                            <small class="d-block text-muted fst-italic mt-1">(Lei nº 15.100/2025, que restringe o uso de aparelhos eletrônicos portáteis pessoais por estudantes durante a aula, o recreio ou intervalos entre as aulas em todas as etapas da educação básica. Esta lei foi sancionada em 13 de janeiro de 2025 e visa proteger a saúde mental, física e psíquica de crianças e adolescentes, promovendo um ambiente escolar mais saudável e equilibrado).</small>
+                        </label>
+                    </div>
+
+                    <div class="form-check mb-2">
+                        <input class="form-check-input" type="checkbox" name="motivo" value="Sair da sala de aula sem permissão do professor (a)." id="m10">
+                        <label class="form-check-label" for="m10">Sair da sala de aula sem permissão do professor (a).</label>
+                    </div>
+
+                    <div class="form-check mb-2">
+                        <input class="form-check-input" type="checkbox" name="motivo" value="Sair da escola antes do horário sem autorização previa do setor pedagógico/gestão." id="m11">
+                        <label class="form-check-label" for="m11">Sair da escola antes do horário sem autorização previa do setor pedagógico/gestão.</label>
+                    </div>
+
+                    <div class="form-check mb-2">
+                        <input class="form-check-input" type="checkbox" name="motivo" value="Namoro dentro das instalações da escola." id="m12">
+                        <label class="form-check-label" for="m12">Namoro dentro das instalações da escola.</label>
+                    </div>
+
+                    <div class="form-check mb-2">
+                        <input class="form-check-input" type="checkbox" name="motivo" value="Outros:" id="m13" onchange="document.getElementById('campoOutros').style.display = this.checked ? 'block' : 'none';">
+                        <label class="form-check-label fw-bold" for="m13">Outros:</label>
+                    </div>
+
+                    <div class="mt-2 ms-4" id="campoOutros" style="display: none;">
+                        <input type="text" name="motivo_outro" class="form-control bg-body border-0 shadow-sm" placeholder="Especifique o motivo da advertência...">
+                    </div>
+
+                </div>
+
+                <div class="alert alert-warning border-0 rounded-4 small mb-4">
+                    <i class="bi bi-info-circle-fill me-1"></i>
+                    <strong>Observação:</strong> O(a) estudante (a) foi advertido (a) e orientado (a) pelo seu ato, conforme o regimento interno da escola e ainda com base no ECA, essas práticas poderão acarretar prejuízo para seu aproveitamento escolar, esclarecendo que se reincidente e necessário, a escola o (a) encaminhará à família e/ou aos órgãos competentes para as devidas providências.
+                </div>
+
+                <div class="row g-3 mb-4">
+                    <div class="col-md-6">
+                        <label class="form-label fw-bold text-secondary small">COMPONENTE CURRICULAR</label>
+                        <div class="input-group">
+                            <span class="input-group-text bg-body-secondary border-0"><i class="bi bi-journal-bookmark text-secondary"></i></span>
+                            <input type="text" name="disciplina" class="form-control bg-body-secondary border-0 py-2" placeholder="Ex: Matemática, Português" required>
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <label class="form-label fw-bold text-secondary small">DATA DA OCORRÊNCIA</label>
+                        <div class="input-group">
+                            <span class="input-group-text bg-body-secondary border-0"><i class="bi bi-calendar-event text-secondary"></i></span>
+                            <input type="date" name="data_ocorrencia" class="form-control bg-body-secondary border-0 py-2" required>
+                        </div>
                     </div>
                 </div>
 
-                <div class="mb-2">
-                    <label class="form-label small fw-bold text-secondary text-uppercase d-block mb-1">Atalhos de Motivo Rápidos</label>
-                    <div class="d-flex flex-wrap gap-2 mb-2">
-                        <span class="badge bg-body-secondary text-body border p-2 motivo-chip" onclick="adicionarMotivo('Uso indevido do celular durante a aula.')">+ Uso de Celular</span>
-                        <span class="badge bg-body-secondary text-body border p-2 motivo-chip" onclick="adicionarMotivo('Conversa excessiva atrapalhando a explicação.')">+ Conversa Paralela</span>
-                        <span class="badge bg-body-secondary text-body border p-2 motivo-chip" onclick="adicionarMotivo('Desrespeito ou desacato ao professor/colega.')">+ Desrespeito</span>
-                        <span class="badge bg-body-secondary text-body border p-2 motivo-chip" onclick="adicionarMotivo('Não realizou/entregou as atividades propostas.')">+ Tarefa Não Feita</span>
-                    </div>
-                </div>
-
-                <div class="mb-4">
-                    <label class="form-label small fw-bold text-secondary text-uppercase">Descrição Detalhada do Motivo</label>
-                    <textarea id="motivo" name="motivo" class="form-control bg-body-secondary border-0 p-3" rows="4" placeholder="Descreva o que ocorreu..." required></textarea>
-                </div>
-
-                <button type="submit" class="btn btn-danger btn-lg w-100 fw-bold rounded-3 shadow-sm py-3">
-                    <i class="bi bi-send-fill me-2"></i> Enviar Advertência
+                <button type="submit" class="btn btn-primary btn-lg w-100 fw-bold rounded-4 shadow-sm py-2">
+                    <i class="bi bi-file-earmark-check me-2"></i>Gerar Advertência
                 </button>
-
             </form>
         </div>
     </div>
-
-    <script>
-        function adicionarMotivo(texto) {
-            var campo = document.getElementById('motivo');
-            if (campo.value !== "") {
-                campo.value += " " + texto;
-            } else {
-                campo.value = texto;
-            }
-        }
-    </script>
 
     <script>
       const btnDarkMode = document.getElementById('btnDarkMode');
@@ -174,7 +221,5 @@
         aplicarTema(novoTema);
       });
     </script>
-
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
 </body>
 </html>
