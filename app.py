@@ -48,7 +48,6 @@ def professor():
 @app.route('/secretaria')
 def secretaria():
     total_ocorrencias = len(HISTORICO_ADVERTENCIAS)
-    total_graves = sum(1 for item in HISTORICO_ADVERTENCIAS if item.get('gravidade') == 'Grave')
     busca = request.args.get('busca', '').strip().lower()
 
     if busca:
@@ -62,8 +61,7 @@ def secretaria():
     return render_template(
         'secretaria.html', 
         advertencias=advertencias_filtradas, 
-        total_ocorrencias=total_ocorrencias, 
-        total_graves=total_graves,
+        total_ocorrencias=total_ocorrencias,
         busca=busca
     )
 
