@@ -1,65 +1,68 @@
 from flask import Flask, render_template, request, redirect, url_for, flash
 
 app = Flask(__name__)
-app.secret_key = 'sua_chave_secreta_aqui'  # Necessário para gerenciar sessões/mensagens
+app.secret_key = 'sua_chave_secreta_aqui'
 
-# 1. ROTA RAIZ (Redireciona direto para o login)
+# 1. ROTA RAIZ
 @app.route('/')
 def index():
     return redirect(url_for('login'))
 
-# 2. ROTA DE LOGIN
+# 2. ROTA DE LOGIN (Com redirecionamento para Professor ou Secretaria)
 @app.route('/login', methods=['GET', 'POST'])
 def login():
     erro_usuario = None
     erro_senha = None
 
     if request.method == 'POST':
-        usuario = request.form.get('usuario')
-        senha = request.form.get('senha')
+        usuario = request.form.get('usuario', '').strip()
+        senha = request.form.get('senha', '').strip()
 
-        # Exemplo simples de validação (substitua pelas suas credenciais reais se necessário)
-        if usuario == "admin" and senha == "1234":
+        # Validação de perfil (Exemplo):
+        if usuario == "professor" and senha == "1234":
             return redirect(url_for('professor'))
+        elif usuario == "secretaria" and senha == "1234":
+            return redirect(url_for('secretaria'))
+        elif usuario == "admin" and senha == "1234":
+            return redirect(url_for('secretaria'))
         else:
-            if usuario != "admin":
-                erro_usuario = "Usuário incorreto"
-            if senha != "1234":
-                erro_senha = "Senha incorreta"
+            erro_usuario = "Usuário ou senha incorretos"
+            erro_senha = "Verifique suas credenciais"
 
     return render_template('login.html', erro_usuario=erro_usuario, erro_senha=erro_senha)
 
-# 3. ROTA DO FORMULÁRIO DOS PROFESSORES
+# 3. ROTA DO PROFESSOR (Formulário para registrar advertências)
 @app.route('/professor')
 def professor():
     return render_template('professor.html')
 
-# 4. ROTA QUE PROCESSA A ADVERTÊNCIA (Evita Not Found e Internal Server Error)
+# 4. ROTA DA SECRETARIA (Painel de controle / Visualização de advertências)
+@app.route('/secretaria')
+def secretaria():
+    # Renderiza a página da secretaria (templates/secretaria.html)
+    return render_template('secretaria.html')
+
+# 5. ROTA QUE PROCESSA E GERA A ADVERTÊNCIA
 @app.route('/gerar_advertencia', methods=['POST'])
 def gerar_advertencia():
     try:
-        # Pega os dados dos campos de texto
         estudante = request.form.get('estudante', '').strip()
         turma = request.form.get('turma', '').strip()
         disciplina = request.form.get('disciplina', '').strip()
         data_ocorrencia = request.form.get('data_ocorrencia', '').strip()
         
-        # Pega a lista com todos os checkboxes marcados
         motivos_selecionados = request.form.getlist('motivo')
         motivo_outro = request.form.get('motivo_outro', '').strip()
 
-        # Se a opção 'Outros:' foi marcada e o professor escreveu o complemento
         if "Outros:" in motivos_selecionados and motivo_outro:
             motivos_selecionados.remove("Outros:")
             motivos_selecionados.append(f"Outros: {motivo_outro}")
 
-        # Formata os motivos em tópicos para exibição
         if motivos_selecionados:
             motivos_formatados = "".join([f"<li class='list-group-item bg-transparent'>• {m}</li>" for m in motivos_selecionados])
         else:
             motivos_formatados = "<li class='list-group-item bg-transparent text-muted'>Nenhum motivo selecionado</li>"
 
-        # Retorna a confirmação formatada em HTML direto
         return f'''
         <!DOCTYPE html>
         <html lang="pt-br">
@@ -106,7 +109,6 @@ def gerar_advertencia():
         </html>
         '''
     except Exception as erro:
-        # Se ocorrer qualquer falha interna, mostra a mensagem legível em vez da tela preta/branca do Erro 500
         return f"""
         <div style="font-family: sans-serif; padding: 20px; text-align: center;">
             <h2>Ops! Algo deu errado ao processar a advertência.</h2>
