@@ -3,7 +3,7 @@ from flask import Flask, render_template, request, redirect, url_for, session
 app = Flask(__name__)
 app.secret_key = 'sua_chave_secreta_aqui'
 
-# Banco de dados temporário em memória para contar advertências por aluno
+# Banco de dados temporário em memória
 HISTORICO_ADVERTENCIAS = []
 
 # 1. ROTA RAIZ
@@ -67,7 +67,14 @@ def secretaria():
         busca=busca
     )
 
-# 6. PROCESSAR E GERAR ADVERTÊNCIA (Com alerta de 3ª Advertência e sem botão de imprimir)
+# 6. ROTA PARA EXCLUIR REGISTRO (Corrige erro 404/500 no botão de lixeira)
+@app.route('/excluir/<int:id>')
+def excluir(id):
+    global HISTORICO_ADVERTENCIAS
+    HISTORICO_ADVERTENCIAS = [item for item in HISTORICO_ADVERTENCIAS if item['id'] != id]
+    return redirect(url_for('secretaria'))
+
+# 7. PROCESSAR E GERAR ADVERTÊNCIA
 @app.route('/gerar_advertencia', methods=['POST'])
 def gerar_advertencia():
     try:
@@ -83,29 +90,30 @@ def gerar_advertencia():
             motivos_selecionados.remove("Outros:")
             motivos_selecionados.append(f"Outros: {motivo_outro}")
 
-        # Contagem de advertências prévias para o mesmo estudante
         nome_normalizado = estudante.lower()
         contagem_aluno = sum(1 for item in HISTORICO_ADVERTENCIAS if item['estudante'].lower() == nome_normalizado) + 1
+        
+        # Junta os motivos para exibição limpa no histórico
+        motivos_texto = ", ".join(motivos_selecionados) if motivos_selecionados else "Nenhum informado"
 
-        # Salva no histórico
         nova_adv = {
             'id': len(HISTORICO_ADVERTENCIAS) + 1,
             'estudante': estudante,
             'turma': turma,
             'disciplina': disciplina,
+            'professor': session.get('usuario', 'Professor'),
             'data': data_ocorrencia,
-            'motivos': motivos_selecionados,
-            'gravidade': 'Grave' if len(motivos_selecionados) > 2 else 'Média'
+            'motivos': motivos_texto,
+            'motivos_lista': motivos_selecionados,
+            'gravidade': 'Grave' if (len(motivos_selecionados) > 2 or contagem_aluno >= 3) else 'Média'
         }
         HISTORICO_ADVERTENCIAS.append(nova_adv)
 
-        # Formatação visual dos motivos
         if motivos_selecionados:
             motivos_formatados = "".join([f"<li class='list-group-item bg-transparent border-0 ps-0 text-start'>• {m}</li>" for m in motivos_selecionados])
         else:
             motivos_formatados = "<li class='list-group-item bg-transparent border-0 ps-0 text-muted'>Nenhum motivo selecionado</li>"
 
-        # Bloco de alerta para pais se atingir 3 advertências ou mais
         alerta_pais_html = ""
         if contagem_aluno >= 3:
             alerta_pais_html = f'''
