@@ -177,3 +177,34 @@ def logout():
 
 if __name__ == '__main__':
     app.run(debug=True)
+
+from flask import Flask, render_template, request, redirect, url_for
+
+# (Mantenha o resto das suas rotas existentes e adicione esta abaixo)
+
+@app.route('/gerar_advertencia', methods=['POST'])
+def gerar_advertencia():
+    # 1. Pega os dados digitados no formulário
+    estudante = request.form.get('estudante')
+    turma = request.form.get('turma')
+    disciplina = request.form.get('disciplina')
+    data_ocorrencia = request.form.get('data_ocorrencia')
+    
+    # 2. Pega todos os motivos marcados nas checkboxes
+    motivos_selecionados = request.form.getlist('motivo')
+    motivo_outro = request.form.get('motivo_outro')
+
+    # Se a opção 'Outros:' foi marcada e o professor escreveu algo, adiciona na lista
+    if "Outros:" in motivos_selecionados and motivo_outro:
+        motivos_selecionados.remove("Outros:")
+        motivos_selecionados.append(f"Outros: {motivo_outro}")
+
+    # 3. Aqui você pode redirecionar para uma página de sucesso, 
+    # gerar um PDF ou salvar no banco de dados. 
+    # Por enquanto, renderizamos a confirmação com os dados:
+    return render_template('sucesso.html', 
+                           estudante=estudante, 
+                           turma=turma, 
+                           disciplina=disciplina, 
+                           data=data_ocorrencia, 
+                           motivos=motivos_selecionados)
