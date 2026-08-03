@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Login - Escola</title>
+    <title>Advertência online - Login</title>
     
     <link rel="manifest" href="{{ url_for('static', filename='manifest.json') }}">
     <meta name="theme-color" content="#0d6efd">
@@ -18,7 +18,7 @@
 
     <style>
         body {
-            background: linear-gradient(135deg, #0d6efd 0%, #0a58ca 100%);
+            background: #0d6efd;
             min-height: 100vh;
             transition: background 0.3s ease;
         }
@@ -35,8 +35,23 @@
         }
 
         .logo-escola {
-            max-height: 90px;
+            width: 100px;
+            height: 100px;
             object-fit: contain;
+            border-radius: 50%;
+        }
+
+        /* Logótipo em SVG/CSS caso a imagem PNG falhe */
+        .logo-placeholder {
+            width: 100px;
+            height: 100px;
+            border-radius: 50%;
+            background: radial-gradient(circle, #00bfff 0%, #007bff 100%);
+            border: 3px solid #ffffff;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.15);
         }
     </style>
 </head>
@@ -49,11 +64,23 @@
     <div class="card shadow-lg border-0 rounded-5 p-3 w-100 bg-body-tertiary" style="max-width: 380px;">
         <div class="card-body text-center">
             
-            <div class="mb-3">
-                <img src="{{ url_for('static', filename='logo.png') }}" alt="Logo Escola" class="logo-escola img-fluid">
+            <div class="mb-3 d-flex justify-content-center">
+                <img src="{{ url_for('static', filename='logo.png') }}" 
+                     alt="E. E. Mestra Hercília" 
+                     class="logo-escola shadow-sm"
+                     onerror="this.style.display='none'; document.getElementById('fallback-logo').style.display='inline-flex';">
+                
+                <div id="fallback-logo" class="logo-placeholder" style="display: none;">
+                    <svg width="60" height="60" viewBox="0 0 100 100" fill="none" xmlns="http://www.w3.org/2000/svg">
+                        <circle cx="50" cy="50" r="45" fill="#00A3E0" stroke="white" stroke-width="3"/>
+                        <circle cx="50" cy="35" r="14" fill="#FFC72C"/>
+                        <path d="M20 65 C35 50, 45 40, 50 25 C55 40, 65 50, 80 65 Z" fill="white"/>
+                        <path d="M25 72 C40 68, 60 68, 75 72" stroke="white" stroke-width="4" stroke-linecap="round"/>
+                    </svg>
+                </div>
             </div>
 
-            <h4 class="fw-bold mb-1">Acesso Escolar</h4>
+            <h4 class="fw-bold mb-1">Advertência online</h4>
             <p class="text-secondary small mb-4">Entre com suas credenciais</p>
 
             <form method="POST" class="text-start">
