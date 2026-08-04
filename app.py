@@ -18,6 +18,14 @@ supabase: Client = create_client(SUPABASE_URL, SUPABASE_KEY)
 def index():
     return redirect(url_for('login'))
 
+
+
+@app.route('/sw.js')
+def serve_sw():
+    return app.send_static_file('sw.js')
+
+
+
 # 2. ROTA DE LOGIN
 @app.route('/login', methods=['GET', 'POST'])
 def login():
