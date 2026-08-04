@@ -134,29 +134,6 @@
         </div>
     </div>
 
-    <script>
-      const btnDarkMode = document.getElementById('btnDarkMode');
-      const darkModeIcon = document.getElementById('darkModeIcon');
-      const htmlElement = document.documentElement;
-
-      function aplicarTema(tema) {
-        htmlElement.setAttribute('data-bs-theme', tema);
-        if (tema === 'dark') {
-          darkModeIcon.classList.replace('bi-moon-stars-fill', 'bi-sun-fill');
-        } else {
-          darkModeIcon.classList.replace('bi-sun-fill', 'bi-moon-stars-fill');
-        }
-        localStorage.setItem('theme', tema);
-      }
-
-      const temaSalvo = localStorage.getItem('theme') || 'light';
-      aplicarTema(temaSalvo);
-
-      btnDarkMode.addEventListener('click', () => {
-        const temaAtual = htmlElement.getAttribute('data-bs-theme');
-        const novoTema = temaAtual === 'dark' ? 'light' : 'dark';
-        aplicarTema(novoTema);
-      });
-    </script>
+  
 </body>
 </html>
