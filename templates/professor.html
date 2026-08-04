@@ -237,5 +237,12 @@
         </div>
     </div>
 
+    <script>
+  if ('serviceWorker' in navigator) {
+    navigator.serviceWorker.register("{{ url_for('static', filename='sw.js') }}");
+  }
+</script>
+
+    
 </body>
 </html>
