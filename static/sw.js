@@ -1,5 +1,11 @@
-<script>
-  if ('serviceWorker' in navigator) {
-    navigator.serviceWorker.register("{{ url_for('static', filename='sw.js') }}");
-  }
-</script>
+self.addEventListener('install', (event) => {
+  self.skipWaiting();
+});
+
+self.addEventListener('activate', (event) => {
+  event.waitUntil(clients.claim());
+});
+
+self.addEventListener('fetch', (event) => {
+  // Mantém as requisições normais da aplicação
+});
