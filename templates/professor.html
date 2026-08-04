@@ -237,12 +237,13 @@
         </div>
     </div>
 
-    <script>
+ <script>
   if ('serviceWorker' in navigator) {
-    navigator.serviceWorker.register("{{ url_for('static', filename='sw.js') }}");
+    navigator.serviceWorker.register("{{ url_for('static', filename='sw.js') }}")
+      .then(reg => console.log('Service Worker registrado!', reg))
+      .catch(err => console.error('Erro ao registrar Service Worker:', err));
   }
 </script>
-
     
 </body>
 </html>
