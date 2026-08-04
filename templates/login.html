@@ -134,7 +134,7 @@
 
     <script>
   if ('serviceWorker' in navigator) {
-    navigator.serviceWorker.register('/sw.js')
+    navigator.serviceWorker.register('/sw.js') 
       .then(reg => console.log('Service Worker registrado na raiz!', reg))
       .catch(err => console.error('Erro no SW:', err));
   }
