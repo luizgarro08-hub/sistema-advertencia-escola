@@ -1,10 +1,17 @@
+import os
 from flask import Flask, render_template, request, redirect, url_for, session
+from supabase import create_client, Client
 
 app = Flask(__name__)
-app.secret_key = 'sua_chave_secreta_aqui'
+app.secret_key = os.environ.get('SECRET_KEY', 'chave_secreta_padrao')
 
-# Banco de dados temporário em memória
-HISTORICO_ADVERTENCIAS = []
+# --- CONFIGURAÇÃO DO SUPABASE ---
+SUPABASE_URL = "https://jztctnjhnntqdlhaxxhf.supabase.co"
+# Cole aqui a sua chave anon / public (encontrada em Settings > API no Supabase)
+SUPABASE_KEY = os.environ.get("SUPABASE_KEY", "SUA_CHAVE_ANON_AQUI")
+
+supabase: Client = create_client(SUPABASE_URL, SUPABASE_KEY)
+
 
 # 1. ROTA RAIZ
 @app.route('/')
@@ -47,32 +54,41 @@ def professor():
 # 5. ROTA DA SECRETARIA
 @app.route('/secretaria')
 def secretaria():
-    total_ocorrencias = len(HISTORICO_ADVERTENCIAS)
-    busca = request.args.get('busca', '').strip().lower()
+    busca = request.args.get('busca', '').strip()
 
-    if busca:
-        advertencias_filtradas = [
-            item for item in HISTORICO_ADVERTENCIAS 
-            if busca in item['estudante'].lower() or busca in item['turma'].lower()
-        ]
-    else:
-        advertencias_filtradas = HISTORICO_ADVERTENCIAS
+    try:
+        query = supabase.table('advertencias').select('*').order('id', desc=True)
+        
+        if busca:
+            query = query.or_(f"estudante.ilike.%{busca}%,turma.ilike.%{busca}%")
+
+        resposta = query.execute()
+        advertencias = resposta.data
+        total_ocorrencias = len(advertencias)
+
+    except Exception as e:
+        print(f"Erro ao buscar no Supabase: {e}")
+        advertencias = []
+        total_ocorrencias = 0
 
     return render_template(
         'secretaria.html', 
-        advertencias=advertencias_filtradas, 
+        advertencias=advertencias, 
         total_ocorrencias=total_ocorrencias,
         busca=busca
     )
 
-# 6. ROTA PARA EXCLUIR REGISTRO (Corrige erro 404/500 no botão de lixeira)
+# 6. ROTA PARA EXCLUIR REGISTRO
 @app.route('/excluir/<int:id>')
 def excluir(id):
-    global HISTORICO_ADVERTENCIAS
-    HISTORICO_ADVERTENCIAS = [item for item in HISTORICO_ADVERTENCIAS if item['id'] != id]
+    try:
+        supabase.table('advertencias').delete().eq('id', id).execute()
+    except Exception as e:
+        print(f"Erro ao deletar no Supabase: {e}")
+        
     return redirect(url_for('secretaria'))
 
-# 7. PROCESSAR E GERAR ADVERTÊNCIA
+# 7. PROCESSAR E SALVAR ADVERTÊNCIA
 @app.route('/gerar_advertencia', methods=['POST'])
 def gerar_advertencia():
     try:
@@ -88,30 +104,35 @@ def gerar_advertencia():
             motivos_selecionados.remove("Outros:")
             motivos_selecionados.append(f"Outros: {motivo_outro}")
 
-        nome_normalizado = estudante.lower()
-        contagem_aluno = sum(1 for item in HISTORICO_ADVERTENCIAS if item['estudante'].lower() == nome_normalizado) + 1
-        
-        # Junta os motivos para exibição limpa no histórico
         motivos_texto = ", ".join(motivos_selecionados) if motivos_selecionados else "Nenhum informado"
+        professor_nome = session.get('usuario', 'Professor')
 
-        nova_adv = {
-            'id': len(HISTORICO_ADVERTENCIAS) + 1,
+        # Contagem de advertências para o aluno no banco
+        historico_aluno = supabase.table('advertencias') \
+            .select('id') \
+            .ilike('estudante', estudante) \
+            .execute()
+
+        contagem_aluno = len(historico_aluno.data) + 1
+
+        # Salva no Supabase
+        dados_nova_adv = {
             'estudante': estudante,
             'turma': turma,
             'disciplina': disciplina,
-            'professor': session.get('usuario', 'Professor'),
+            'professor': professor_nome,
             'data': data_ocorrencia,
-            'motivos': motivos_texto,
-            'motivos_lista': motivos_selecionados,
-            'gravidade': 'Grave' if (len(motivos_selecionados) > 2 or contagem_aluno >= 3) else 'Média'
+            'motivos': motivos_texto
         }
-        HISTORICO_ADVERTENCIAS.append(nova_adv)
+        
+        supabase.table('advertencias').insert(dados_nova_adv).execute()
 
         if motivos_selecionados:
             motivos_formatados = "".join([f"<li class='list-group-item bg-transparent border-0 ps-0 text-start'>• {m}</li>" for m in motivos_selecionados])
         else:
             motivos_formatados = "<li class='list-group-item bg-transparent border-0 ps-0 text-muted'>Nenhum motivo selecionado</li>"
 
+        # Mensagem de alerta se atingir 3 advertências
         alerta_pais_html = ""
         if contagem_aluno >= 3:
             alerta_pais_html = f'''
