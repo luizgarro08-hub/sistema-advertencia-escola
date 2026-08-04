@@ -6,3 +6,4 @@ self.addEventListener('fetch', (e) => {
   // Mantém o app funcionando online com as rotas do Flask
 });
  
+ 
