@@ -8,7 +8,7 @@ app.secret_key = os.environ.get('SECRET_KEY', 'chave_secreta_padrao')
 # --- CONFIGURAÇÃO DO SUPABASE ---
 SUPABASE_URL = "https://jztctnjhnntqdlhaxxhf.supabase.co"
 # Cole aqui a sua chave anon / public (encontrada em Settings > API no Supabase)
-SUPABASE_KEY = os.environ.get("SUPABASE_KEY", "escolaescolla")
+SUPABASE_KEY = os.environ.get("SUPABASE_KEY", "sb_publishable_iAj9F0rFjQAuZO5sXiJTcw_9G5N7qxV")
 
 supabase: Client = create_client(SUPABASE_URL, SUPABASE_KEY)
 
