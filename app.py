@@ -28,10 +28,10 @@ def login():
         usuario = request.form.get('usuario', '').strip()
         senha = request.form.get('senha', '').strip()
 
-        if usuario == "professor" and senha == "1234":
+        if usuario == "professor" and senha == "1223":
             session['usuario'] = usuario
             return redirect(url_for('professor'))
-        elif usuario in ["secretaria", "admin"] and senha == "1234":
+        elif usuario in ["secretaria", "admin"] and senha == "secretaria123":
             session['usuario'] = usuario
             return redirect(url_for('secretaria'))
         else:
