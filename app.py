@@ -7,7 +7,6 @@ app.secret_key = os.environ.get('SECRET_KEY', 'chave_secreta_padrao')
 
 # --- CONFIGURAÇÃO DO SUPABASE ---
 SUPABASE_URL = "https://jztctnjhnntqdlhaxxhf.supabase.co"
-# Cole aqui a sua chave anon / public (encontrada em Settings > API no Supabase)
 SUPABASE_KEY = os.environ.get("SUPABASE_KEY", "sb_publishable_iAj9F0rFjQAuZO5sXiJTcw_9G5N7qxV")
 
 supabase: Client = create_client(SUPABASE_URL, SUPABASE_KEY)
@@ -19,11 +18,10 @@ def index():
     return redirect(url_for('login'))
 
 
-
+# ROTA DO SERVICE WORKER (PWA)
 @app.route('/sw.js')
 def serve_sw():
     return app.send_static_file('sw.js')
-
 
 
 # 2. ROTA DE LOGIN
@@ -48,23 +46,27 @@ def login():
 
     return render_template('login.html', erro_usuario=erro_usuario, erro_senha=erro_senha)
 
+
 # 3. ROTA DE LOGOUT
 @app.route('/logout')
 def logout():
     session.clear()
     return redirect(url_for('login'))
 
+
 # 4. ROTA DO PROFESSOR
 @app.route('/professor')
 def professor():
     return render_template('professor.html')
 
-# 5. ROTA DA SECRETARIA
+
+# 5. ROTA DA SECRETARIA (Com cálculo de alunos com 3+ advertências)
 @app.route('/secretaria')
 def secretaria():
     busca = request.args.get('busca', '').strip()
 
     try:
+        # Busca todas as advertências
         query = supabase.table('advertencias').select('*').order('id', desc=True)
         
         if busca:
@@ -74,17 +76,30 @@ def secretaria():
         advertencias = resposta.data
         total_ocorrencias = len(advertencias)
 
+        # Mapeia e conta quantas advertências cada aluno possui para o Alerta da Secretaria
+        contagem_por_aluno = {}
+        for adv in advertencias:
+            nome_aluno = adv.get('estudante', '').strip()
+            if nome_aluno:
+                contagem_por_aluno[nome_aluno] = contagem_por_aluno.get(nome_aluno, 0) + 1
+
+        # Filtra apenas os alunos com 3 ou mais advertências
+        alunos_alerta = {aluno: qtd for aluno, qtd in contagem_por_aluno.items() if qtd >= 3}
+
     except Exception as e:
         print(f"Erro ao buscar no Supabase: {e}")
         advertencias = []
         total_ocorrencias = 0
+        alunos_alerta = {}
 
     return render_template(
         'secretaria.html', 
         advertencias=advertencias, 
         total_ocorrencias=total_ocorrencias,
-        busca=busca
+        busca=busca,
+        alunos_alerta=alunos_alerta  # Variável enviada APENAS para a secretaria.html
     )
+
 
 # 6. ROTA PARA EXCLUIR REGISTRO
 @app.route('/excluir/<int:id>')
@@ -95,6 +110,7 @@ def excluir(id):
         print(f"Erro ao deletar no Supabase: {e}")
         
     return redirect(url_for('secretaria'))
+
 
 # 7. PROCESSAR E SALVAR ADVERTÊNCIA
 @app.route('/gerar_advertencia', methods=['POST'])
@@ -115,14 +131,6 @@ def gerar_advertencia():
         motivos_texto = ", ".join(motivos_selecionados) if motivos_selecionados else "Nenhum informado"
         professor_nome = session.get('usuario', 'Professor')
 
-        # Contagem de advertências para o aluno no banco
-        historico_aluno = supabase.table('advertencias') \
-            .select('id') \
-            .ilike('estudante', estudante) \
-            .execute()
-
-        contagem_aluno = len(historico_aluno.data) + 1
-
         # Salva no Supabase
         dados_nova_adv = {
             'estudante': estudante,
@@ -140,22 +148,7 @@ def gerar_advertencia():
         else:
             motivos_formatados = "<li class='list-group-item bg-transparent border-0 ps-0 text-muted'>Nenhum motivo selecionado</li>"
 
-        # Mensagem de alerta se atingir 3 advertências
-        alerta_pais_html = ""
-        if contagem_aluno >= 3:
-            alerta_pais_html = f'''
-            <div class="alert alert-danger border-0 rounded-4 shadow-sm mb-4 text-start p-3">
-                <div class="d-flex align-items-center mb-2">
-                    <i class="bi bi-exclamation-octagon-fill fs-3 me-2 text-danger"></i>
-                    <h5 class="fw-bold mb-0 text-danger">ATENÇÃO: NOTIFICAÇÃO AOS PAIS NECESSÁRIA!</h5>
-                </div>
-                <p class="mb-0 small text-dark">
-                    O(a) estudante <strong>{estudante}</strong> atingiu a marca de <strong>{contagem_aluno} advertências</strong> registradas no sistema. 
-                    É obrigatório comunicar a família/responsáveis para o acompanhamento pedagógico e disciplinar.
-                </p>
-            </div>
-            '''
-
+        # Tela de confirmação do professor (sem o aviso de notificação aos pais)
         return f'''
         <!DOCTYPE html>
         <html lang="pt-br">
@@ -175,8 +168,6 @@ def gerar_advertencia():
                 
                 <h3 class="fw-bold mb-1">Advertência Registrada!</h3>
                 <p class="text-secondary small mb-3">E. E. Mestra Hercília — Registro Digital</p>
-
-                {alerta_pais_html}
 
                 <div class="card bg-white border border-light-subtle rounded-4 text-start p-3 mb-4 shadow-sm">
                     <p class="mb-1"><strong>Estudante:</strong> {estudante}</p>
@@ -208,6 +199,7 @@ def gerar_advertencia():
             <a href="/professor">Voltar para a página anterior</a>
         </div>
         """, 500
+
 
 if __name__ == '__main__':
     app.run(debug=True)
