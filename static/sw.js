@@ -1,9 +1,5 @@
-self.addEventListener('install', (e) => {
-  console.log('App instalado com sucesso!');
-});
-
-self.addEventListener('fetch', (e) => {
-  // Mantém o app funcionando online com as rotas do Flask
-});
- 
- 
+<script>
+  if ('serviceWorker' in navigator) {
+    navigator.serviceWorker.register("{{ url_for('static', filename='sw.js') }}");
+  }
+</script>
